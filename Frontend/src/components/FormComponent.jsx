@@ -5,7 +5,7 @@ import '../../public/css/form.css';
 function FormComponent({ initialValues, validationSchema, onSubmit, fields, buttonLabel }) {
   return (
     <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
-      <Form>
+      <Form className='form-content'>
         {fields.map((field, index) => (
           <div className="form-controller" key={index}>
             <label>

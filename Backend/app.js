@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import http from 'http'
 import express from 'express'
 import cors from 'cors'
 import userRouters from './routes/userRouters.js'
@@ -21,14 +22,14 @@ app.use("/user", userRouters);
 
 const port = process.env.PORT || 3000;
 
-
 // Database Sync
 async function initializeDatabase() {
     await sequelize.sync({ force: false });
   }
-  
-  initializeDatabase();
+    initializeDatabase();
 
-app.listen(port, () => {
+const server = http.createServer(app)
+
+server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

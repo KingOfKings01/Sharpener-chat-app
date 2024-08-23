@@ -21,8 +21,8 @@ function SignIn() {
     try {
       setLoading(true); 
       setError(null);
-      const response = await signIn(values);
-      alert('Sign In successful', response);
+      const token = await signIn(values);
+      alert('Sign In successful');
       // Handle successful sign-in, e.g., navigate to dashboard or store token
     } catch (err) {
       setError(err?.message || 'Sign In failed');

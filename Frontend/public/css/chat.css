@@ -1,0 +1,79 @@
+.char-box {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full height of the viewport */
+  border: 1px solid #ddd; /* Optional: to visualize the chat box */
+  padding: 10px;
+  box-sizing: border-box;
+  .title {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .messages {
+    flex: 1; /* Takes up all available space between title and form */
+    overflow-y: auto; /* Allows scrolling if messages overflow */
+    border: 1px solid #ddd; /* Optional: to visualize the messages area */
+    margin-bottom: 10px; /* Space between messages and form */
+    display: flex;
+    margin: auto 20vw;
+    padding: 20px;
+    flex-direction: column;
+    gap: 10px;
+
+
+
+.left, .right {
+    max-width: 60%; /* Limit message width */
+    padding: 10px;
+    border-radius: 10px;
+    display: inline-block;
+    margin: 5px 0;
+  }
+  
+  .left {
+    align-self: flex-start;
+    background-color: #f1f1f1;
+  }
+  
+  .right {
+    align-self: flex-end;
+    background-color: #007bff;
+    color: white;
+  }
+  
+  }
+.send-message{
+    padding: 5px 20vw;
+    margin-top: 10px;
+    background: #414041;
+    border-radius: 2px;
+    .message-form {
+        display: flex;
+        gap: 10px; /* Space between input and button */
+    
+        input {
+        width: 100%;
+          flex: 1; /* Takes up remaining space */
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+        }
+    
+        button {
+          padding: 10px 20px;
+          border: none;
+          border-radius: 4px;
+          background-color: #007bff;
+          color: white;
+          cursor: pointer;
+        }
+    
+        button:hover {
+          background-color: #0056b3;
+        }
+      }
+}
+  
+}
