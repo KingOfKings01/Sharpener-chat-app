@@ -1,28 +1,36 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Assuming you're using react-router for navigation
+import { useNavigate } from "react-router-dom";
 import { getMessages, sendMessage } from "../API/messageApis";
-import "../../public/css/chat.css"
+import "../../public/css/chat.css";
 
 export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const navigate = useNavigate();
-  // Check for token on component mount
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login"); // Redirect to login page if token is not found
     } else {
-      fetchMessages(); // Fetch messages if token is found
+      // Fetch messages initially
+      fetchMessages();
+
+      // Set up interval to fetch messages every second
+      const intervalId = setInterval(() => {
+        fetchMessages();
+      }, 1000);
+
+      // Clean up interval on component unmount
+      return () => clearInterval(intervalId);
     }
-  }, []);
+  }, [navigate]);
 
   // Fetch all messages from the server
   const fetchMessages = async () => {
     try {
       const token = localStorage.getItem("token");
-      const messages = await getMessages(token)
-      // console.table(messages);
+      const messages = await getMessages(token);
       setMessages(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -34,9 +42,8 @@ export default function Chat() {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      const receivedMessage = await sendMessage(token, newMessage)
-      console.log(receivedMessage);
-      setMessages([...messages, receivedMessage]); // Add new message to the messages array
+      const receivedMessage = await sendMessage(token, newMessage);
+      setMessages((prevMessages) => [...prevMessages, receivedMessage]);
       setNewMessage(""); // Clear input field
     } catch (error) {
       console.error("Error sending message:", error);
@@ -47,17 +54,13 @@ export default function Chat() {
     <div className="chat-box">
       <h1 className="title">Chat App</h1>
       <div className="messages">
-
         {messages.map((msg, index) => (
           <div
-            className={msg.name == "You" ? "right" : "left"}
+            className={msg.name === "You" ? "right" : "left"}
             key={index}
           >
             <span>{msg.name}:</span>
-            <p
-            >
-              {msg.message}
-            </p>
+            <p>{msg.message}</p>
           </div>
         ))}
       </div>
