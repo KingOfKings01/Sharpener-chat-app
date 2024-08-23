@@ -19,7 +19,7 @@ function SignIn() {
   const fields = [
     { name: 'name', type: 'text', placeholder: 'Name' },
     { name: 'email', type: 'email', placeholder: 'Email' },
-    { name: 'number', type: 'tel', placeholder: 'Phone number' },
+    { name: 'phone', type: 'tel', placeholder: 'Phone number' },
     { name: 'password', type: 'password', placeholder: 'Password' },
   ];
 
