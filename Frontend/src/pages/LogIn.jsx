@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import FormComponent from '../components/FormComponent';
 import { login } from '../API/userApis';
 import { useState } from 'react';
@@ -7,6 +7,7 @@ import { useState } from 'react';
 function LogIn() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const initialValues = { email: '', password: '' };
 
@@ -20,7 +21,9 @@ function LogIn() {
       setLoading(true);
       setError(null);
       const token = await login(values);
+      localStorage.setItem('token', token)
       alert('Log In successful');
+      navigate("/")
       // Handle successful login, e.g., redirect or store token
     } catch (err) {
       setError(err?.message || "Login failed");
@@ -35,7 +38,7 @@ function LogIn() {
   ];
 
   return (
-    <div>
+    <div className='form-page'>
       <h2>Log In</h2>
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: 'red' }}>{error}</p>}

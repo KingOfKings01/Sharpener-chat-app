@@ -18,7 +18,7 @@ function ForgotPassword() {
   ];
 
   return (
-    <div>
+    <div className='form-page'>
       <h2>Forgot Password</h2>
       <FormComponent initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit} fields={fields} buttonLabel="Reset Password" />
       <div className="navigation-links">

@@ -4,6 +4,7 @@ import '../../public/css/form.css';
 
 function FormComponent({ initialValues, validationSchema, onSubmit, fields, buttonLabel }) {
   return (
+
     <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
       <Form className='form-content'>
         {fields.map((field, index) => (
@@ -21,6 +22,8 @@ function FormComponent({ initialValues, validationSchema, onSubmit, fields, butt
         <button type="submit">{buttonLabel}</button>
       </Form>
     </Formik>
+
+
   );
 }
 
