@@ -19,10 +19,10 @@ function SignIn() {
 
   const onSubmit = async (values) => {
     try {
-      setLoading(true);
+      setLoading(true); 
       setError(null);
       const response = await signIn(values);
-      console.log('Sign In successful', response);
+      alert('Sign In successful', response);
       // Handle successful sign-in, e.g., navigate to dashboard or store token
     } catch (err) {
       setError(err?.message || 'Sign In failed');

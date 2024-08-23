@@ -2,7 +2,6 @@ import User from "../models/User.js";
 
 // Create a new User
 export const createUser = async (req, res) => {
-
   try {
     const { name, email, phone, password } = req.body;
 
@@ -21,18 +20,18 @@ export const createUser = async (req, res) => {
     });
 
     if (existingUser) {
-        return res.status(409).json({ message: "User already exists" });
+      return res.status(409).json({ message: "User already exists" });
     } else {
-        //todo: hook will be called when user is created from encrypting password.
-        
-        const user = await User.create(data);
-        
-        
-      const token = User.generateToken({
-        id: user.id,
-        name: user.name,
-      });
-      res.status(200).json({ token });
+      //todo: hook will be called when user is created from encrypting password.
+
+      const user = await User.create(data);
+
+    //   const token = User.generateToken({
+    //     id: user.id,
+    //     name: user.name,
+    //   });
+
+      res.status(200).json({ message : "User created" });
     }
   } catch (err) {
     res.status(500).json({ message: "Internal Server Error" });
@@ -53,8 +52,8 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "User not authorized" });
     }
 
-    const token = User.generateToken({ id: user.id, username: user.username });
-    res.status(200).json({ token });
+    // const token = User.generateToken({ id: user.id, name: user.name });
+    res.status(200).json({ message: "User created" });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
   }
