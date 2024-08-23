@@ -6,6 +6,7 @@ import "../../public/css/chat.css";
 export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [lastMessageId, setLastMessageId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,29 +14,58 @@ export default function Chat() {
     if (!token) {
       navigate("/login"); // Redirect to login page if token is not found
     } else {
-      // Fetch messages initially
-      fetchMessages();
+      // Load messages from local storage on component mount
+      const storedMessages = JSON.parse(localStorage.getItem("messages")) || [];
+      // Sort stored messages by createdAt
+      const sortedMessages = storedMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      setMessages(sortedMessages);
 
-      // Set up interval to fetch messages every second
-      const intervalId = setInterval(() => {
+      // Fetch messages every 1 second
+      const interval = setInterval(() => {
         fetchMessages();
       }, 1000);
 
-      // Clean up interval on component unmount
-      return () => clearInterval(intervalId);
+      return () => clearInterval(interval); // Cleanup interval on component unmount
     }
-  }, [navigate]);
+  }, []);
 
   // Fetch all messages from the server
   const fetchMessages = async () => {
     try {
       const token = localStorage.getItem("token");
-      const messages = await getMessages(token);
-      setMessages(messages);
+      const fetchedMessages = await getMessages(token, lastMessageId);
+  
+      if (fetchedMessages.length === 0) return;
+  
+      setMessages(prevMessages => {
+        // Create a set of existing message IDs for quick lookup
+        const existingIds = new Set(prevMessages.map(msg => msg.id));
+        // Filter out messages with IDs that already exist in the state
+        const uniqueMessages = fetchedMessages.filter(msg => !existingIds.has(msg.id));
+  
+        // Update lastMessageId based on the new messages
+        const newLastMessageId = uniqueMessages.length > 0 
+          ? uniqueMessages[uniqueMessages.length - 1].id 
+          : lastMessageId;
+  
+        const updatedMessages = [...prevMessages, ...uniqueMessages];
+        // Sort messages by createdAt
+        const sortedMessages = updatedMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  
+        // Enforce local storage limit of 10 messages
+        const limitedMessages = sortedMessages.slice(-10);
+  
+        // Store updated messages in local storage
+        localStorage.setItem("messages", JSON.stringify(limitedMessages));
+  
+        setLastMessageId(newLastMessageId);
+        return limitedMessages;
+      });
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   };
+  
 
   // Handle form submission
   const handleSubmit = async (e) => {
@@ -43,21 +73,34 @@ export default function Chat() {
     try {
       const token = localStorage.getItem("token");
       const receivedMessage = await sendMessage(token, newMessage);
-      setMessages((prevMessages) => [...prevMessages, receivedMessage]);
+  
+      setMessages(prevMessages => {
+        const newMessages = [...prevMessages, receivedMessage];
+        // Sort messages by createdAt
+        const sortedMessages = newMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  
+        // Enforce local storage limit of 10 messages
+        const limitedMessages = sortedMessages.slice(-10);
+  
+        // Store updated messages in local storage
+        localStorage.setItem("messages", JSON.stringify(limitedMessages));
+        return limitedMessages;
+      });
+  
       setNewMessage(""); // Clear input field
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
-
+  
   return (
     <div className="chat-box">
       <h1 className="title">Chat App</h1>
       <div className="messages">
-        {messages.map((msg, index) => (
+        {messages.map((msg) => (
           <div
             className={msg.name === "You" ? "right" : "left"}
-            key={index}
+            key={msg.id} // Use message id as key
           >
             <span>{msg.name}:</span>
             <p>{msg.message}</p>

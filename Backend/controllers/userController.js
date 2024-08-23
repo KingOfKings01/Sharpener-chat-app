@@ -1,11 +1,12 @@
 import User from "../models/User.js";
 import Message from "../models/Message.js";
+import { Op } from "sequelize";
 
 // Create a new message using User model
 export const createMessage = async (req, res) => {
   try {
     const userId = req.user.id;
-    const message = req.body.message;
+    const messageText = req.body.message;
 
     // Find the user by ID
     const user = await User.findByPk(userId);
@@ -14,9 +15,14 @@ export const createMessage = async (req, res) => {
     }
 
     // Create the message using the User model's association method
-    const newMessage = await user.createMessage({ message });
+    const newMessage = await user.createMessage({ message: messageText });
 
-    const response = {name : "You", message: newMessage.message, createdAt: newMessage.createdAt}
+    const response = {
+      id: newMessage.id,
+      name: "You",
+      message: newMessage.message,
+      createdAt: newMessage.createdAt
+    };
 
     return res.status(201).json(response);
   } catch (error) {
@@ -24,20 +30,25 @@ export const createMessage = async (req, res) => {
   }
 };
 
-// Get all messages for a users
+// Get all messages for all users, optionally starting from a specific message ID
 export const getUserMessages = async (req, res) => {
   try {
     const currentUserId = req.user.id;
+    const { lastMessageId } = req.query; // Get last message ID from query parameter
 
-    // Find all users and their messages
+    // Find all users and their messages, optionally starting from a specific message ID
     const users = await User.findAll({
-      attributes: ["id", "name"], // Include the user's ID and name
+      attributes: ["id", "name"], // Include the user's name
       include: [
         {
           model: Message,
           as: "messages",
-          attributes: ["message", "createdAt"], // Include the message and createdAt attributes
-        },
+          attributes: ["id", "message", "createdAt"], // Include message ID and createdAt for sorting
+          where: {
+            ...(lastMessageId && { id: { [Op.gt]: lastMessageId } }) // Fetch messages with ID greater than lastMessageId
+          },
+          order: [['createdAt', 'ASC']] // Ensure messages are ordered by creation time
+        }
       ],
     });
 
@@ -45,14 +56,17 @@ export const getUserMessages = async (req, res) => {
       return res.status(404).json({ error: "No users found" });
     }
 
-    // Flatten the array of messages and sort by createdAt
+    // Construct the response as an array of objects with name and message
     const response = users.flatMap(user => 
       user.messages.map(msg => ({
+        id: msg.id,
         name: user.id === currentUserId ? "You" : user.name,
         message: msg.message,
         createdAt: msg.createdAt
       }))
-    ).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // Sort by createdAt
+    ).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // Sort by creation time
+
+    console.table(response);
 
     return res.status(200).json(response);
   } catch (error) {
