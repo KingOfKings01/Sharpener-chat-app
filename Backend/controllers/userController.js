@@ -26,12 +26,12 @@ export const createUser = async (req, res) => {
 
       const user = await User.create(data);
 
-    //   const token = User.generateToken({
-    //     id: user.id,
-    //     name: user.name,
-    //   });
+      const token = User.generateToken({
+        id: user.id,
+        name: user.name,
+      });
 
-      res.status(200).json({ message : "User created" });
+      res.status(200).json({ token });
     }
   } catch (err) {
     res.status(500).json({ message: "Internal Server Error" });
@@ -52,8 +52,8 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "User not authorized" });
     }
 
-    // const token = User.generateToken({ id: user.id, name: user.name });
-    res.status(200).json({ message: "User created" });
+    const token = User.generateToken({ id: user.id, name: user.name });
+    res.status(200).json({token});
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
   }

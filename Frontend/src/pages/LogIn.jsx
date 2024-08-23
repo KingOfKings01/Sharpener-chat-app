@@ -20,7 +20,7 @@ function LogIn() {
       setLoading(true);
       setError(null);
       const token = await login(values);
-      alert('Log In successful', token);
+      alert('Log In successful');
       // Handle successful login, e.g., redirect or store token
     } catch (err) {
       setError(err?.message || "Login failed");
