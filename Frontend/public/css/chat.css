@@ -19,7 +19,7 @@
   box-shadow: #918e8e52 0px 0px 10px 1px;
   margin-bottom: 10px; /* Space between messages and form */
   display: flex;
-  margin: auto 20vw;
+  margin: auto 5vw;
   padding: 20px;
   flex-direction: column;
   gap: 10px;
@@ -73,6 +73,7 @@ p {
   display: flex;
   gap: 10px; /* Space between input and button */
 }
+
 input {
   width: 100%;
   flex: 1; /* Takes up remaining space */
@@ -92,4 +93,79 @@ button {
 
 button:hover {
   background-color: #0056b3;
+}
+
+
+/* Parts */
+.chat-container {
+  display: flex;
+  height: 100vh;
+}
+
+.left-panel {
+  width: 30%;
+  background-color: #f1f1f1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.right-panel {
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border-left: 1px solid #ddd;
+}
+
+/* Toggle Buttons */
+.toggle-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 10px;
+}
+
+.toggle-buttons button {
+  padding: 10px;
+  width: 100%;
+  cursor: pointer;
+  background-color: #bababc;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+.toggle-buttons button.active {
+  background-color: #5b7be5;
+}
+
+.toggle-buttons button:hover {
+  background-color: #6295dd;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 10px;
+  background-color: #fff;
+}
+
+.message-form {
+  display: flex;
+}
+
+.message-form input {
+  flex: 1;
+  padding: 10px;
+}
+
+.message-form button {
+  padding: 10px;
+}
+
+.left {
+  text-align: left;
+}
+
+.right {
+  text-align: right;
 }

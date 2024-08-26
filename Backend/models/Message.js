@@ -1,9 +1,10 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
-import User from "../models/User.js";
+import User from "./User.js";
+import Group from "./Group.js";
 
 const Message = sequelize.define("Message", {
-  id: {                                                     
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
@@ -15,21 +16,27 @@ const Message = sequelize.define("Message", {
   userId: {
     type: DataTypes.INTEGER,
     references: {
-      model: User, // References the User model
-      key: "id",   // The id in User model
+      model: User,
+      key: "id",
+    },
+  },
+  recipientId: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: User,
+      key: "id",
+      allowNull: true, // Make this field optional
+    },
+  },
+  groupId: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Group,
+      key: "id",
+      allowNull: true, // Make this field optional
     },
   },
 });
 
-// Setting up the associations
-User.hasMany(Message, {
-  foreignKey: "userId",
-  as: "messages",
-});
-
-Message.belongsTo(User, {
-  foreignKey: "userId",
-  as: "user",
-});
 
 export default Message;

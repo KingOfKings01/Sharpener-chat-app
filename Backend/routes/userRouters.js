@@ -1,6 +1,6 @@
 import express from "express";
 
-import { createMessage, createUser, getUserMessages, loginUser } from "../controllers/userController.js";
+import { createMessage, createUser, getAllUsers, getMessages, loginUser } from "../controllers/userController.js";
 
 import { authorization } from "../middleware/auth.js";
 
@@ -13,6 +13,8 @@ router.post("/login", loginUser);
 router.post("/create-message",authorization, createMessage);
 
 // Get all messages for a specific user
-router.get("/get-messages", authorization,  getUserMessages);
+router.get("/get-messages", authorization,  getMessages);
+
+router.get("/get-Users", authorization,  getAllUsers);
 
 export default router;

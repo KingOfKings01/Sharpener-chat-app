@@ -1,0 +1,11 @@
+.user-list, .group-list
+{
+    ul{
+        li{
+            background: #a8a6a6;
+            padding: 5px;
+            margin: 2px 0;
+            cursor: pointer;
+        }
+    }
+}

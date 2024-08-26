@@ -1,0 +1,91 @@
+.popup-overlay {
+    position: fixed; /* Fixed positioning to cover the entire screen */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+    display: flex;
+    align-items: center; /* Center the popup vertically */
+    justify-content: center; /* Center the popup horizontally */
+    z-index: 1000; /* Ensure the popup is above other content */
+  }
+  
+  .popup-content {
+    background-color: #fff; /* White background for the popup */
+    border-radius: 8px; /* Rounded corners */
+    padding: 20px; /* Space inside the popup */
+    width: 90%; /* Make the popup responsive */
+    max-width: 500px; /* Set a maximum width */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for the popup */
+    position: relative; /* Position relative for absolute positioning of close button */
+  }
+  
+  .popup-content h2 {
+    margin-top: 0;
+  }
+  
+  .popup-content form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .popup-content input[type="text"] {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .popup-content ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .popup-content ul li {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+  
+  .popup-content ul li.selected {
+    background-color: #007bff; /* Selected item background color */
+    color: #fff; /* Selected item text color */
+    border-color: #007bff; /* Selected item border color */
+  }
+  
+  .popup-content ul li:hover {
+    color: #f2ebeb;
+    background-color: #4a6ee1a9; /* Hover background color */
+  }
+  
+  .popup-content button {
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff; /* Primary button color */
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .popup-content button:hover {
+    background-color: #0056b3; /* Darker shade for hover effect */
+  }
+  
+  .popup-content button.cancel {
+    background-color: #6c757d; /* Secondary button color */
+  }
+  
+  .popup-content button.cancel:hover {
+    background-color: #5a6268; /* Darker shade for hover effect */
+  }
+  
+  .popup-content label {
+    margin-bottom: 5px;
+  }
+  

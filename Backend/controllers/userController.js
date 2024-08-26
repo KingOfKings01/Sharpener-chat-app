@@ -1,81 +1,191 @@
+import { Op, where } from "sequelize";
 import User from "../models/User.js";
 import Message from "../models/Message.js";
-import { Op } from "sequelize";
+import Group from "../models/Group.js";
+import GroupMember from "../models/GroupMember.js";
 
-// Create a new message using User model
+//Todo: Create a new message using User model
 export const createMessage = async (req, res) => {
   try {
     const userId = req.user.id;
-    const messageText = req.body.message;
+    const { message: messageText, recipientEmail, groupId } = req.body;
 
-    // Find the user by ID
     const user = await User.findByPk(userId);
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // Create the message using the User model's association method
-    const newMessage = await user.createMessage({ message: messageText });
+    let response = {};
 
-    const response = {
-      id: newMessage.id,
-      name: "You",
-      message: newMessage.message,
-      createdAt: newMessage.createdAt
-    };
+    if (groupId) {
+      const group = await Group.findByPk(groupId);
+      if (!group) {
+        return res.status(404).json({ message: "Group not found" });
+      }
+
+      const newMessage = await Message.create({
+        message: messageText,
+        userId,
+        groupId,
+      });
+
+      response = {
+        id: newMessage.id,
+        sender: "You",
+        recipient: null,
+        message: newMessage.message,
+        createdAt: newMessage.createdAt,
+        groupId: newMessage.groupId,
+      };
+    } else if (recipientEmail) {
+      const recipient = await User.findOne({
+        where: { email: recipientEmail },
+      });
+      if (!recipient) {
+        return res.status(404).json({ message: "Recipient not found" });
+      }
+
+      const newMessage = await Message.create({
+        message: messageText,
+        userId,
+        recipientId: recipient.id,
+      });
+
+      response = {
+        id: newMessage.id,
+        sender: "You",
+        recipient: recipient.name,
+        message: newMessage.message,
+        createdAt: newMessage.createdAt,
+        groupId: null,
+      };
+    } else {
+      return res
+        .status(400)
+        .json({
+          message: "Either recipientEmail or groupId must be provided.",
+        });
+    }
 
     return res.status(201).json(response);
   } catch (error) {
-    return res.status(500).json({ error: "An error occurred while creating the message" });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while creating the message" });
   }
 };
 
-// Get all messages for all users, optionally starting from a specific message ID
-export const getUserMessages = async (req, res) => {
+//Todo: Get all messages for all users, optionally starting from a specific message ID
+export const getMessages = async (req, res) => {
   try {
     const currentUserId = req.user.id;
-    const { lastMessageId } = req.query; // Get last message ID from query parameter
+    const { recipientEmail, groupId } = req.query;
 
-    // Find all users and their messages, optionally starting from a specific message ID
-    const users = await User.findAll({
-      attributes: ["id", "name"], // Include the user's name
-      include: [
-        {
-          model: Message,
-          as: "messages",
-          attributes: ["id", "message", "createdAt"], // Include message ID and createdAt for sorting
-          where: {
-            ...(lastMessageId && { id: { [Op.gt]: lastMessageId } }) // Fetch messages with ID greater than lastMessageId
-          },
-          order: [['createdAt', 'ASC']] // Ensure messages are ordered by creation time
-        }
-      ],
-    });
-
-    if (!users) {
-      return res.status(404).json({ error: "No users found" });
+    if (!recipientEmail && !groupId) {
+      return res.status(400).json({
+        message: "Either recipientEmail or groupId must be provided.",
+      });
     }
 
-    // Construct the response as an array of objects with name and message
-    const response = users.flatMap(user => 
-      user.messages.map(msg => ({
-        id: msg.id,
-        name: user.id === currentUserId ? "You" : user.name,
-        message: msg.message,
-        createdAt: msg.createdAt
-      }))
-    ).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // Sort by creation time
+    if (recipientEmail && groupId) {
+      return res.status(400).json({
+        message: "Cannot provide both recipientEmail and groupId.",
+      });
+    }
 
-    console.table(response);
+    let messages = [];
 
-    return res.status(200).json(response);
+    if (groupId) {
+      // Fetch group messages
+      const groupMessages = await Message.findAll({
+        where: {
+          groupId: groupId,
+        },
+        include: [
+          {
+            model: User, // Include the User model to get sender information
+            attributes: ["id", "name"],
+          },
+        ],
+        order: [["createdAt", "ASC"]], // Sort messages by creation time
+      });
+
+      groupMessages.forEach((message) => {
+        const isCurrentUserSender = message.userId === currentUserId;
+        messages.push({
+          sender: isCurrentUserSender ? "You" : message.User.name,
+          id: message.id,
+          message: message.message,
+          createdAt: message.createdAt,
+        });
+      });
+
+    } else if (recipientEmail) {
+      // Fetch individual messages
+      const recipient = await User.findOne({
+        attributes: ["id", "name"],
+        where: {
+          email: recipientEmail,
+        },
+      });
+
+      const recipientId = recipient ? recipient.dataValues.id : null;
+      const recipientName = recipient ? recipient.dataValues.name : null;
+
+      const data = await Message.findAll({
+        where: {
+          [Op.or]: [
+            { userId: currentUserId, recipientId }, // Messages sent by the current user
+            { userId: recipientId, recipientId: currentUserId }, // Messages received by the current user
+          ],
+        },
+        order: [["createdAt", "ASC"]], // Sort messages by creation time
+      });
+
+      data.forEach((message) => {
+        const isCurrentUserSender = message.userId === currentUserId; 
+        messages.push({
+          sender: isCurrentUserSender ? "You" : recipientName,
+          id: message.id,
+          message: message.message,
+          createdAt: message.createdAt,
+        });
+      });
+    }
+
+    return res.status(200).json(messages);
   } catch (error) {
-    return res.status(500).json({ error: "An error occurred while fetching messages" });
+    console.log(error);
+    return res
+      .status(500)
+      .json({ message: "An error occurred while fetching messages" });
   }
 };
 
 
-// Create a new User
+
+//Todo: Get all Users
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      attributes: ["name", "email"],
+    });
+
+    if (!users.length) {
+      // Simplified check
+      return res.status(404).json({ message: "No users found" });
+    }
+
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error); // Log the error for debugging
+    return res
+      .status(500)
+      .json({ message: "An error occurred while fetching users" });
+  }
+};
+
+//Todo: Create a new User (Sign-in)
 export const createUser = async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
@@ -113,6 +223,7 @@ export const createUser = async (req, res) => {
   }
 };
 
+//Todo: Login a User
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -128,7 +239,7 @@ export const loginUser = async (req, res) => {
     }
 
     const token = User.generateToken({ id: user.id, name: user.name });
-    res.status(200).json({token});
+    res.status(200).json({ token });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
   }
