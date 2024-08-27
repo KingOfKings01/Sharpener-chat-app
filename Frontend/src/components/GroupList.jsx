@@ -3,10 +3,13 @@ import { useEffect, useState } from "react";
 import { getAllGroups } from "../API/groupApis.js";
 import PropTypes from 'prop-types';
 import GroupPopup from "./GroupPopup.jsx";
+import AdminPopup from "./AdminPopup.jsx";
 
 export default function GroupList({ onSelectGroup }) {
   const [groups, setGroups] = useState([]);
-  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [isGroupPopupVisible, setIsGroupPopupVisible] = useState(false);
+  const [isAdminPopupVisible, setIsAdminPopupVisible] = useState(false);
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -21,22 +24,41 @@ export default function GroupList({ onSelectGroup }) {
     fetchGroups();
   }, []);
 
-  const handleOpenPopup = () => {
-    setIsPopupVisible(true);
+  const handleOpenGroupPopup = () => {
+    setIsGroupPopupVisible(true);
   };
 
-  const handleClosePopup = () => {
-    setIsPopupVisible(false);
+  const handleCloseGroupPopup = () => {
+    setIsGroupPopupVisible(false);
+  };
+
+  const handleOpenAdminPopup = (groupId) => {
+    setSelectedGroupId(groupId);
+    setIsAdminPopupVisible(true);
+  };
+
+  const handleCloseAdminPopup = () => {
+    setIsAdminPopupVisible(false);
+    setSelectedGroupId(null); // Clear the selected group ID
   };
 
   return (
     <div className="group-list">
-      <button onClick={handleOpenPopup}>Create Group</button>
-      {isPopupVisible && <GroupPopup onClose={handleClosePopup} />}
+      <button onClick={handleOpenGroupPopup}>Create Group</button>
+      {isGroupPopupVisible && <GroupPopup onClose={handleCloseGroupPopup} />}
+      {isAdminPopupVisible && selectedGroupId && (
+        <AdminPopup groupId={selectedGroupId} onClose={handleCloseAdminPopup} />
+      )}
       <ul>
         {groups.map((group, index) => (
           <li key={index} onClick={() => onSelectGroup(group.id)}>
-            {group.name}
+            {group.name} {group.role}
+            {/* Conditionally render button if the role is admin */}
+            {group.role === "admin" && (
+              <button onClick={() => handleOpenAdminPopup(group.id)}>
+                Admin Options
+              </button>
+            )}
           </li>
         ))}
       </ul>

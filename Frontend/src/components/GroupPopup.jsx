@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
 import { createGroup } from "../API/groupApis.js";
-import '../../public/css/GroupPopup.css'; // Import the CSS file
 import { getAllUsers } from "../API/userApis.js";
+import '../../public/css/GroupPopup.css';
 
 export default function GroupPopup({ onClose }) {
   const [groupName, setGroupName] = useState("");

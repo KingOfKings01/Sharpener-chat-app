@@ -162,13 +162,15 @@ export const getMessages = async (req, res) => {
   }
 };
 
-
-
 //Todo: Get all Users
 export const getAllUsers = async (req, res) => {
+  const userId = req.user.id;
   try {
     const users = await User.findAll({
       attributes: ["name", "email"],
+      where: {
+        id: { [Op.ne]: userId } // Exclude the user with the matching userId
+      }
     });
 
     if (!users.length) {

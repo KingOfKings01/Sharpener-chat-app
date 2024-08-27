@@ -49,7 +49,7 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
     };
 
     fetchMessages();
-    const interval = setInterval(fetchMessages, 1000);
+    const interval = setInterval(fetchMessages, 1000 * 5000);
     return () => clearInterval(interval);
   }, [selectedUser, selectedGroup]);
 

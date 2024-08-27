@@ -13,7 +13,7 @@ export const getGroups = async (req, res) => {
       include: [{
         model: GroupMember,
         where: { userId },
-        attributes: [], // We don't need any attributes from GroupMember
+        attributes: ["role"], // Get role attributes (admin or member)
       }],
       attributes: ['id', 'name'], // Only return the group's id and name
     });
@@ -22,17 +22,21 @@ export const getGroups = async (req, res) => {
       return res.status(404).json({ message: "No groups found." });
     }
 
-    console.log();
-    console.log(groups);
-    console.log();
+    const groupsWithRoles = groups.map(group => ({
+      ...group.dataValues,
+      role: group.GroupMembers[0]?.dataValues.role
+    }));
 
-    return res.status(200).json(groups);
+    console.log();
+    console.table(groups);
+    console.log(groupsWithRoles);
+
+    return res.status(200).json(groupsWithRoles);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "An error occurred while fetching groups." });
   }
 };
-
 
 //Todo: Create a new group with transaction handling
 export const createGroup = async (req, res) => {
@@ -68,7 +72,7 @@ export const createGroup = async (req, res) => {
     }));
 
     // Include the admin as a member of the group
-    groupMembers.push({ groupId: newGroup.id, userId: adminId });
+    groupMembers.push({ groupId: newGroup.id, userId: adminId, role: "admin" });
 
     // Insert the members into the GroupMember table
     await GroupMember.bulkCreate(groupMembers, { transaction });
