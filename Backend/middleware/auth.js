@@ -2,7 +2,10 @@ import User from "../models/User.js";
 
 export const authorization = async (req, res, next) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];
+
+const token = req.headers.authorization.split(" ")[1];
+
+
     if (!token) {
       return res
       .status(401)
@@ -20,6 +23,7 @@ export const authorization = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
     req.user = user; // Attach user object to request
     next();
   } catch (error) {

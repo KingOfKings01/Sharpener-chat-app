@@ -1,4 +1,4 @@
-import { Op, where } from "sequelize";
+import { Op } from "sequelize";
 import User from "../models/User.js";
 import Message from "../models/Message.js";
 import Group from "../models/Group.js";

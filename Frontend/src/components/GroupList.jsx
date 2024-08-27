@@ -52,7 +52,7 @@ export default function GroupList({ onSelectGroup }) {
       <ul>
         {groups.map((group, index) => (
           <li key={index} onClick={() => onSelectGroup(group.id)}>
-            {group.name} {group.role}
+            {group.name} {group.id}
             {/* Conditionally render button if the role is admin */}
             {group.role === "admin" && (
               <button onClick={() => handleOpenAdminPopup(group.id)}>

@@ -2,8 +2,10 @@ import GroupMember from '../models/GroupMember.js';
 
 export const isAdmin = async (req, res, next) => {
   try {
+
     const userId = req.user.id;
-    const { groupId } = req.params; // Assuming groupId is passed in the request parameters
+    const groupId  = req.body.groupId;
+
 
     // Check if the user is an admin of the group
     const groupMember = await GroupMember.findOne({
@@ -19,7 +21,7 @@ export const isAdmin = async (req, res, next) => {
     }
 
     // If the user is an admin, proceed to the next middleware or controller
-    req.adminUserId = userId; // You can pass the userId if needed
+    req.groupId = groupId;
     next();
   } catch (error) {
     console.error("Error checking admin role:", error);
