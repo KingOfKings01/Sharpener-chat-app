@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 export async function getMessages(
   token,
@@ -7,7 +7,7 @@ export async function getMessages(
   selectedGroup
 ) {
   try {
-    const response = await axios.get("http://localhost:4000/user/get-messages", {
+    const response = await axios.get(`${import.meta.env.VITE_API}/user/get-messages`, {
       params: {
         recipientEmail: selectedUser,
         groupId: selectedGroup,
@@ -22,7 +22,7 @@ export async function getMessages(
   } catch (err) {
     throw new Error(
       err?.response?.data?.message ||
-      "Something went wrong! Please try again later."
+      `Something went wrong! Please try again later.`
     );
   }
 }
@@ -31,7 +31,7 @@ export async function getMessages(
 export async function sendMessage(token, newMessage, selectedUser, selectedGroup) {
   try {
     const response = await axios.post(
-      "http://localhost:4000/user/create-message",
+      `${import.meta.env.VITE_API}/user/create-message`,
       { message: newMessage, groupId: selectedGroup, recipientEmail: selectedUser},
       {
         headers: {
@@ -43,7 +43,7 @@ export async function sendMessage(token, newMessage, selectedUser, selectedGroup
   } catch (err) {
     throw new Error(
       err?.response?.data?.message ||
-        "Something went wrong! Please try again later."
+        `Something went wrong! Please try again later.`
     );
   }
 }

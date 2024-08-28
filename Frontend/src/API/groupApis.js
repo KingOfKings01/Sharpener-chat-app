@@ -1,5 +1,5 @@
 // src/API/groupApis.js
-import axios from "axios";
+import axios from 'axios';
 
 // Create a new group
 export async function createGroup(token, groupName, selectedMembers) {
@@ -7,10 +7,10 @@ export async function createGroup(token, groupName, selectedMembers) {
     name: groupName,
     members: selectedMembers,
   };
-
+  
   try {
     const response = await axios.post(
-      "http://localhost:4000/group/create",
+      `${import.meta.env.VITE_API}/group/create`,
       groupData,
       {
         headers: {
@@ -22,7 +22,7 @@ export async function createGroup(token, groupName, selectedMembers) {
   } catch (err) {
     throw new Error(
       err?.response?.data?.message ||
-        "Something went wrong! Please try again later."
+        `Something went wrong! Please try again later.`
     );
   }
 }
@@ -31,7 +31,7 @@ export async function createGroup(token, groupName, selectedMembers) {
 export async function getAllGroups(token) {
   try {
     const response = await axios.get(
-      "http://localhost:4000/group/user-groups",
+      `${import.meta.env.VITE_API}/group/user-groups`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -42,7 +42,7 @@ export async function getAllGroups(token) {
   } catch (err) {
     throw new Error(
       err?.response?.data?.message ||
-        "Something went wrong! Please try again later."
+        `Something went wrong! Please try again later.`
     );
   }
 }
@@ -50,7 +50,7 @@ export async function getAllGroups(token) {
 export async function getGroupMembers(token, groupId) {
   try {
     const response = await axios.post(
-      "http://localhost:4000/group/get-members",
+      `${import.meta.env.VITE_API}/group/get-members`,
       {
         groupId,
       },
@@ -64,7 +64,7 @@ export async function getGroupMembers(token, groupId) {
   } catch (err) {
     throw new Error(
       err?.response?.data?.message ||
-        "Something went wrong! Please try again later."
+        `Something went wrong! Please try again later.`
     );
   }
 }
@@ -72,7 +72,7 @@ export async function getGroupMembers(token, groupId) {
 export async function getNonGroupMembers(token, groupId) {
   try {
     const response = await axios.post(
-      "http://localhost:4000/group/get-non-members",
+      `${import.meta.env.VITE_API}/group/get-non-members`,
       {
         groupId,
       },
@@ -86,7 +86,7 @@ export async function getNonGroupMembers(token, groupId) {
   } catch (err) {
     throw new Error(
       err?.response?.data?.message ||
-        "Something went wrong! Please try again later."
+        `Something went wrong! Please try again later.`
     );
   }
 }
@@ -95,7 +95,7 @@ export async function getNonGroupMembers(token, groupId) {
 export async function addUserToGroup(token, addUserId, groupId) {
   try {
     const response = await axios.post(
-      "http://localhost:4000/group/add-user", 
+      `${import.meta.env.VITE_API}/group/add-user`, 
       {
         addUserId,
         groupId,
@@ -110,7 +110,7 @@ export async function addUserToGroup(token, addUserId, groupId) {
   } catch (err) {
     throw new Error(
       err?.response?.data?.message ||
-        "Something went wrong! Please try again later."
+        `Something went wrong! Please try again later.`
     );
   }
 }
@@ -118,7 +118,7 @@ export async function addUserToGroup(token, addUserId, groupId) {
 export async function removeUserFromGroup(token, addUserId, groupId) {
   try {
     const response = await axios.post(
-      "http://localhost:4000/group/remove-user",
+      `${import.meta.env.VITE_API}/group/remove-user`,
       {
         addUserId,
         groupId,
@@ -133,7 +133,7 @@ export async function removeUserFromGroup(token, addUserId, groupId) {
   } catch (err) {
     throw new Error(
       err?.response?.data?.message ||
-        "Something went wrong! Please try again later."
+        `Something went wrong! Please try again later.`
     );
   }
 }
@@ -142,7 +142,7 @@ export async function updateUserToAdmin(token, addUserId, groupId) {
 
   try {
     const response = await axios.put(
-      "http://localhost:4000/group/user-to-admin",
+      `${import.meta.env.VITE_API}/group/user-to-admin`,
       {
         addUserId,
         groupId,
@@ -157,7 +157,7 @@ export async function updateUserToAdmin(token, addUserId, groupId) {
   } catch (err) {
     throw new Error(
       err?.response?.data?.message ||
-        "Something went wrong! Please try again later."
+        `Something went wrong! Please try again later.`
     );
   }
 }
