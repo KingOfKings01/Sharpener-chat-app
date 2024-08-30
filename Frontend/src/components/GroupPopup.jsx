@@ -14,8 +14,9 @@ export default function GroupPopup({ onClose }) {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
+      // eslint-disable-next-line no-unused-vars
       const response = await createGroup(token, groupName, selectedMembers);
-      console.log("Group created:", response);
+      // console.log("Group created:", response);
       onClose();
     } catch (error) {
       console.error("Error creating group:", error);

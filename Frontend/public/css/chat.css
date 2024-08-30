@@ -6,10 +6,45 @@
   padding: 10px;
   box-sizing: border-box;
 }
-.title {
-  font-size: 2rem;
+
+
+
+.empty {
+  width: 100%;
   text-align: center;
-  margin-bottom: 20px;
+  padding: 10px;
+  color: white;
+  border-radius: 10px;
+  background-color: #41404168;
+
+}
+
+.center{
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  height: 100vh;
+}
+
+.chat-box .title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  font-size: 1.5rem;
+  
+  padding: 5px 20px;
+  color: snow;
+  background: #5588ee;
+  margin-bottom: 10px;
+}
+
+.title button{
+  background-color: rgb(243, 78, 78);
+
+  &:hover{
+    background-color: rgb(219, 58, 58);
+  }
 }
 
 .messages {
@@ -38,14 +73,11 @@
 }
 
 .left,
-.right
-span {
+.right span {
   font-size: small;
 }
 
-
-.left
-p {
+.left p {
   font-size: medium;
 }
 
@@ -63,7 +95,7 @@ p {
 }
 
 .send-message {
-  padding: 5px 20vw;
+  padding: 10px 5vw;
   margin-top: 10px;
   background: #414041;
   border-radius: 2px;
@@ -95,7 +127,6 @@ button:hover {
   background-color: #0056b3;
 }
 
-
 /* Parts */
 .chat-container {
   display: flex;
@@ -113,7 +144,6 @@ button:hover {
   width: 70%;
   display: flex;
   flex-direction: column;
-  padding: 10px;
   border-left: 1px solid #ddd;
 }
 

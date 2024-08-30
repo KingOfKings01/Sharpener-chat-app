@@ -22,8 +22,9 @@ function SignIn() {
     try {
       setLoading(true); 
       setError(null);
-      const token = await signIn(values);
+      const {token, email} = await signIn(values);
       localStorage.setItem('token', token)
+      localStorage.setItem('email', email)
       alert('Sign In successful');
       navigate("/")
       // Handle successful sign-in, e.g., navigate to dashboard or store token

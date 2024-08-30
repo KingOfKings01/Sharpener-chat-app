@@ -7,7 +7,7 @@ export async function signIn(data) {
       `${import.meta.env.VITE_API}/user/sign-in`, // Corrected endpoint
       data
     );
-    return response.data.token;
+    return response.data;
   } catch (err) {
     throw new Error(
       err?.response?.data?.message ||
@@ -19,7 +19,7 @@ export async function signIn(data) {
 export async function login(data) {
   try {
     const response = await axios.post(`${import.meta.env.VITE_API}/user/login`, data);
-    return response.data.token;
+    return response.data;
   } catch (err) {
     throw new Error(
       err?.response?.data?.message ||

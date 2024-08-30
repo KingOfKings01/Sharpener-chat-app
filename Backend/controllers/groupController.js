@@ -76,8 +76,6 @@ export const getGroupMembers = async (req, res) => {
 
     const members = transformKeys(groupMembers)
 
-    // const members = groupMembers.map((member) => member.User);
-    console.log(members[0]);
     return res.status(200).json(members);
   } catch (error) {
     console.error("Error fetching group members:", error);

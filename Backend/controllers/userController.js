@@ -5,75 +5,81 @@ import Group from "../models/Group.js";
 import GroupMember from "../models/GroupMember.js";
 
 //Todo: Create a new message using User model
-export const createMessage = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { message: messageText, recipientEmail, groupId } = req.body;
+// export const createMessage = async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+//     const { message: messageText, recipientEmail, groupId } = req.body;
+//     const io = req.io; // Access the io instance attached to req
 
-    const user = await User.findByPk(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+//     const user = await User.findByPk(userId);
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
 
-    let response = {};
+//     let response = {};
 
-    if (groupId) {
-      const group = await Group.findByPk(groupId);
-      if (!group) {
-        return res.status(404).json({ message: "Group not found" });
-      }
+//     if (groupId) {
+//       const group = await Group.findByPk(groupId);
+//       if (!group) {
+//         return res.status(404).json({ message: "Group not found" });
+//       }
 
-      const newMessage = await Message.create({
-        message: messageText,
-        userId,
-        groupId,
-      });
+//       const newMessage = await Message.create({
+//         message: messageText,
+//         userId,
+//         groupId,
+//       });
 
-      response = {
-        id: newMessage.id,
-        sender: "You",
-        recipient: null,
-        message: newMessage.message,
-        createdAt: newMessage.createdAt,
-        groupId: newMessage.groupId,
-      };
-    } else if (recipientEmail) {
-      const recipient = await User.findOne({
-        where: { email: recipientEmail },
-      });
-      if (!recipient) {
-        return res.status(404).json({ message: "Recipient not found" });
-      }
+//       response = {
+//         id: newMessage.id,
+//         sender: "You",
+//         recipient: null,
+//         message: newMessage.message,
+//         createdAt: newMessage.createdAt,
+//         groupId: newMessage.groupId,
+//       };
 
-      const newMessage = await Message.create({
-        message: messageText,
-        userId,
-        recipientId: recipient.id,
-      });
+//       // Emit the message to the group room
+//       io.to(groupId).emit("newMessage", response);
+//     } else if (recipientEmail) {
+//       const recipient = await User.findOne({
+//         where: { email: recipientEmail },
+//       });
 
-      response = {
-        id: newMessage.id,
-        sender: "You",
-        recipient: recipient.name,
-        message: newMessage.message,
-        createdAt: newMessage.createdAt,
-        groupId: null,
-      };
-    } else {
-      return res
-        .status(400)
-        .json({
-          message: "Either recipientEmail or groupId must be provided.",
-        });
-    }
+//       if (!recipient) {
+//         return res.status(404).json({ message: "Recipient not found" });
+//       }
 
-    return res.status(201).json(response);
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "An error occurred while creating the message" });
-  }
-};
+//       const newMessage = await Message.create({
+//         message: messageText,
+//         userId,
+//         recipientId: recipient.id,
+//       });
+
+//       response = {
+//         id: newMessage.id,
+//         sender: "You",
+//         recipient: recipient.name,
+//         message: newMessage.message,
+//         createdAt: newMessage.createdAt,
+//         groupId: null,
+//       };
+
+//       // Emit the message to the recipient's private room
+//       io.to(recipient.id).emit('newMessage', response);
+//     } else {
+//       return res.status(400).json({
+//         message: "Either recipientEmail or groupId must be provided.",
+//       });
+//     }
+
+//     return res.status(201).json(response);
+//   } catch (error) {
+//     return res
+//       .status(500)
+//       .json({ message: "An error occurred while creating the message" });
+//   }
+// };
 
 //Todo: Get all messages for all users, optionally starting from a specific message ID
 export const getMessages = async (req, res) => {
@@ -119,7 +125,6 @@ export const getMessages = async (req, res) => {
           createdAt: message.createdAt,
         });
       });
-
     } else if (recipientEmail) {
       // Fetch individual messages
       const recipient = await User.findOne({
@@ -143,7 +148,7 @@ export const getMessages = async (req, res) => {
       });
 
       data.forEach((message) => {
-        const isCurrentUserSender = message.userId === currentUserId; 
+        const isCurrentUserSender = message.userId === currentUserId;
         messages.push({
           sender: isCurrentUserSender ? "You" : recipientName,
           id: message.id,
@@ -169,8 +174,8 @@ export const getAllUsers = async (req, res) => {
     const users = await User.findAll({
       attributes: ["name", "email"],
       where: {
-        id: { [Op.ne]: userId } // Exclude the user with the matching userId
-      }
+        id: { [Op.ne]: userId }, // Exclude the user with the matching userId
+      },
     });
 
     if (!users.length) {
@@ -218,7 +223,7 @@ export const createUser = async (req, res) => {
         name: user.name,
       });
 
-      res.status(200).json({ token });
+      res.status(200).json({ token, email: user.email });
     }
   } catch (err) {
     res.status(500).json({ message: "Internal Server Error" });
@@ -241,7 +246,7 @@ export const loginUser = async (req, res) => {
     }
 
     const token = User.generateToken({ id: user.id, name: user.name });
-    res.status(200).json({ token });
+    res.status(200).json({ token, email: user.email });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
   }

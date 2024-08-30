@@ -1,4 +1,3 @@
-// GroupList.jsx
 import { useEffect, useState } from "react";
 import { getAllGroups } from "../API/groupApis.js";
 import PropTypes from 'prop-types';
@@ -42,6 +41,11 @@ export default function GroupList({ onSelectGroup }) {
     setSelectedGroupId(null); // Clear the selected group ID
   };
 
+  const handleSelectGroup = (groupId) => {
+    setSelectedGroupId(groupId); // Update the selected group ID
+    onSelectGroup(groupId); // Trigger the onSelectGroup callback
+  };
+
   return (
     <div className="group-list">
       <button onClick={handleOpenGroupPopup}>Create Group</button>
@@ -51,11 +55,20 @@ export default function GroupList({ onSelectGroup }) {
       )}
       <ul>
         {groups.map((group, index) => (
-          <li key={index} onClick={() => onSelectGroup(group.id)}>
-            {group.name} {group.id}
+          <li 
+            key={index} 
+            onClick={() => handleSelectGroup(group.id)} 
+            className={group.id === selectedGroupId ? "select" : ""}
+          >
+            <span>
+              {group.name}
+            </span>
             {/* Conditionally render button if the role is admin */}
             {group.role === "admin" && (
-              <button onClick={() => handleOpenAdminPopup(group.id)}>
+              <button className="group-options-btn" onClick={(e) => { 
+                e.stopPropagation(); 
+                handleOpenAdminPopup(group.id);
+              }}>
                 Admin Options
               </button>
             )}

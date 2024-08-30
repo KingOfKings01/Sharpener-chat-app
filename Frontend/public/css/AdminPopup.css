@@ -69,3 +69,13 @@
     font-weight: 500;
     padding: 10px;
   }
+
+  .group-list{
+    ul {
+      li{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+  }

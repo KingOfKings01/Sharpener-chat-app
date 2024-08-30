@@ -3,9 +3,18 @@
     ul{
         li{
             background: #a8a6a6;
-            padding: 5px;
+            padding: 10px;
             margin: 2px 0;
             cursor: pointer;
+            list-style: none;
+            
+        }
+
+        .select{
+            color: #fff;
+            cursor: pointer;
+            background-color: #6a6a6a;
+
         }
     }
 }

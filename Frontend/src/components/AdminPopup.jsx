@@ -83,7 +83,7 @@ export default function AdminPopup({ groupId, onClose }) {
       <ul>
         {groupUsers.map(user => (
           <li key={user.id}>
-            {user.name} {user.role}
+            {user.name}
             <div>
               {user.role == 'admin' ? 
               <div className="role">Admin</div>
