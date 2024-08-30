@@ -20,9 +20,10 @@ function LogIn() {
     try {
       setLoading(true);
       setError(null);
-      const {token, email} = await login(values);
+      const {token, email, username} = await login(values);
       localStorage.setItem('token', token)
       localStorage.setItem('email', email)
+      localStorage.setItem('username', username)
       alert('Log In successful');
       navigate("/")
       // Handle successful login, e.g., redirect or store token

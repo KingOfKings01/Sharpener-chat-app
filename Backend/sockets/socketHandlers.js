@@ -22,7 +22,7 @@ export default function socketHandlers(io) {
       try {
         const decoded = User.verifyToken(senderToken);
         const senderId = decoded.id;
-        const sender = decoded.name == socket.user.name ? "You" : decoded.name
+        const sender = decoded.name
         let response = {};
 
         //Todo: Handle group chat message

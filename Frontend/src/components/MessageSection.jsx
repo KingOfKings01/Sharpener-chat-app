@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getMessages } from "../API/messageApis";
 import PropTypes from 'prop-types';
 import { io } from "socket.io-client";
-
+import { useNavigate } from "react-router-dom";
 
 const token = localStorage.getItem("token");
 const socket = io(import.meta.env.VITE_API, {
@@ -16,14 +16,20 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
   const [newMessage, setNewMessage] = useState("");
   const [lastMessageId, setLastMessageId] = useState(null);
   const [roomName, setRoomName] = useState("");
-
+  const navigate = useNavigate();
+  const username = localStorage.getItem("username")
   
-  socket.on('connect', () => {
-    console.log("Connected");
-  });
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log("Connected");
+    });
+
+    return () => {
+      socket.disconnect(); // Disconnect only when the component unmounts
+    };
+  }, []);
 
   useEffect(() => {
-    // console.log("Testing Message");
     if (!selectedUser && !selectedGroup) return; // Do nothing if no user or group is selected
 
     const key = selectedUser ? `messages_user_${selectedUser}` : `messages_group_${selectedGroup}`;
@@ -36,7 +42,6 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
 
     const fetchMessages = async () => {
       try {
-        const token = localStorage.getItem("token");
         const fetchedMessages = await getMessages(token, lastMessageId, selectedUser, selectedGroup);
 
         if (fetchedMessages.length === 0) return;
@@ -67,19 +72,21 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
 
     // Create a consistent room ID for direct messages
     const createRoomId = (user1, user2) => {
-      // Ensure the room ID is consistent regardless of user order
       return [user1, user2].sort().join('_');
     };
 
-    // Join the appropriate room
+    // Leave the previous room (if any) and join the new room
+    if (roomName) {
+      socket.emit('leaveRoom', roomName);
+    }
+
     const currentUserEmail = localStorage.getItem("email");
-    const roomId = selectedUser ? createRoomId(selectedUser, currentUserEmail) : `group_${selectedGroup}`;
-    setRoomName(roomId)
-    socket.emit('joinRoom', roomId);
+    const newRoomId = selectedUser ? createRoomId(selectedUser, currentUserEmail) : `group_${selectedGroup}`;
+    setRoomName(newRoomId);
+    socket.emit('joinRoom', newRoomId);
 
     // Listen for incoming messages
-    socket.on('newMessage', (newMessage) => {
-      // console.log(newMessage);
+    const handleNewMessage = (newMessage) => {
       setMessages(prevMessages => {
         const updatedMessages = [...prevMessages, newMessage];
         const sortedMessages = updatedMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
@@ -89,13 +96,12 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
 
         return limitedMessages;
       });
-    });
+    };
+
+    socket.on('newMessage', handleNewMessage);
 
     return () => {
-      // Leave the room and clean up
-      socket.emit('leaveRoom', roomId);
-      socket.disconnect();
-      socket.off('newMessage'); // Clean up the listener on unmount
+      socket.off('newMessage', handleNewMessage); // Clean up the listener
     };
   }, [selectedUser, selectedGroup]);
 
@@ -109,35 +115,39 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
       senderToken: token
     };
 
-    // console.log(messageData);
-
-    // Emit the message through Socket.IO
     socket.emit('newMessage', messageData);
-
     setNewMessage("");
   };
 
+  const logout = () => {
+    localStorage.clear()
+    navigate("/login")
+  }
   return (
     <div className="chat-box">
       <div className="title">
-        <div>Chat App</div>
-        <button onClick={() => localStorage.clear()}>Logout</button>
+        <div>{username}</div>
+        <button onClick={logout}>Logout</button>
       </div>
-      {messages.length == 0 ?
+      {messages.length === 0 ? (
         <div className="messages center">
           <div className="empty">No messages yet</div>
-        </div> : <div className="messages">
-
-          {messages.map((msg) => (
-            <div
-              className={msg.sender == "You" ? "right" : "left"}
-              key={msg.id}
-            >
-              <span>{msg.sender}:</span>
-              <p>{msg.message}</p>
-            </div>
-          ))}
-        </div>}
+        </div>
+      ) : (
+        <div className="messages">
+          {messages.map((msg) => 
+          {
+            const name = msg.sender == username ? "You" : msg.sender
+            return (
+              <div className={name == "You" ? "right" : "left"} key={msg.id}>
+                <span>{name}:</span>
+                <p>{msg.message}</p>
+              </div>
+            )
+          }
+          )}
+        </div>
+      )}
 
       <div className="send-message">
         <form className="message-form" onSubmit={handleSubmit}>

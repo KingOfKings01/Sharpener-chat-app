@@ -20,11 +20,12 @@ function SignIn() {
 
   const onSubmit = async (values) => {
     try {
-      setLoading(true); 
+      setLoading(true);
       setError(null);
-      const {token, email} = await signIn(values);
+      const { token, email, username } = await signIn(values);
       localStorage.setItem('token', token)
       localStorage.setItem('email', email)
+      localStorage.setItem('username', username)
       alert('Sign In successful');
       navigate("/")
       // Handle successful sign-in, e.g., navigate to dashboard or store token
