@@ -3,6 +3,8 @@ import User from "../models/User.js";
 import Message from "../models/Message.js";
 import Group from "../models/Group.js";
 import GroupMember from "../models/GroupMember.js";
+import AWSService from "../services/awsService.js";
+import multer from 'multer'; // Buffer storage
 
 //Todo: Create a new message using User model
 // export const createMessage = async (req, res) => {
@@ -223,7 +225,7 @@ export const createUser = async (req, res) => {
         name: user.name,
       });
 
-      res.status(200).json({ token, email: user.email, username: user.name});
+      res.status(200).json({ token, email: user.email, username: user.name });
     }
   } catch (err) {
     res.status(500).json({ message: "Internal Server Error" });
@@ -249,5 +251,31 @@ export const loginUser = async (req, res) => {
     res.status(200).json({ token, email: user.email, username: user.name });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const uploadFile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Ensure file is present in req.file
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded." });
+    }
+    
+    const { originalname, mimetype, buffer } = req.file;
+    const key = `${userId}${Date.now()}-${originalname}`;
+    console.log(key, buffer, mimetype);
+
+    const awsService = new AWSService();
+    const uploadResult = await awsService.uploadToS3(key, buffer, mimetype);
+    return res.status(200).json({ url: uploadResult.Location });
+
+    // res.status(200).json({ url: "uploadResult.Location" });
+  } catch (err) {
+  
+    res
+      .status(500)
+      .json({ message: "Internal Server Error - Error uploading file" });
   }
 };

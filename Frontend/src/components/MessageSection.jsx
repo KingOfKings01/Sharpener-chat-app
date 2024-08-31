@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
-import { getMessages } from "../API/messageApis";
+import { useEffect, useRef, useState } from "react";
+import { getMessages, uploadFile } from "../API/messageApis";
 import PropTypes from 'prop-types';
 import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
+import FilePreview from "./MediaViewer";
 
 const token = localStorage.getItem("token");
 const socket = io(import.meta.env.VITE_API, {
@@ -13,12 +14,15 @@ const socket = io(import.meta.env.VITE_API, {
 
 export default function MessageSection({ selectedUser, selectedGroup }) {
   const [messages, setMessages] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
   const [newMessage, setNewMessage] = useState("");
   const [lastMessageId, setLastMessageId] = useState(null);
   const [roomName, setRoomName] = useState("");
+  const [showMessageForm, setShowMessageForm] = useState(true); // State to toggle forms
   const navigate = useNavigate();
-  const username = localStorage.getItem("username")
-  
+  const username = localStorage.getItem("username");
+
   useEffect(() => {
     socket.on('connect', () => {
       console.log("Connected");
@@ -36,7 +40,6 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
     const storedMessages = JSON.parse(localStorage.getItem(key)) || [];
     setMessages(storedMessages);
 
-    // Set the last message ID based on stored messages
     const lastStoredMessage = storedMessages[storedMessages.length - 1];
     setLastMessageId(lastStoredMessage ? lastStoredMessage.id : null);
 
@@ -70,12 +73,10 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
 
     fetchMessages();
 
-    // Create a consistent room ID for direct messages
     const createRoomId = (user1, user2) => {
       return [user1, user2].sort().join('_');
     };
 
-    // Leave the previous room (if any) and join the new room
     if (roomName) {
       socket.emit('leaveRoom', roomName);
     }
@@ -85,7 +86,6 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
     setRoomName(newRoomId);
     socket.emit('joinRoom', newRoomId);
 
-    // Listen for incoming messages
     const handleNewMessage = (newMessage) => {
       setMessages(prevMessages => {
         const updatedMessages = [...prevMessages, newMessage];
@@ -114,15 +114,41 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
       recipientEmail: selectedUser,
       senderToken: token
     };
-
     socket.emit('newMessage', messageData);
     setNewMessage("");
   };
+
+  const handleFileUpload = async (e) => {
+    e.preventDefault();
+    if (!selectedFile) return;
+
+    const url = await uploadFile(token, selectedFile)
+
+    console.log(url);
+
+    // Clear the file input
+    setSelectedFile(null);
+    fileInputRef.current.value = "";  // Clear the file input element
+
+    // Create a new message with the uploaded file URL
+    const messageData = {
+      messageText: newMessage,
+      URL:url,
+      roomName: roomName,
+      groupId: selectedGroup,
+      recipientEmail: selectedUser,
+      senderToken: token
+    };
+
+    // Emit the new message to the server
+    socket.emit('newMessage', messageData);
+  }
 
   const logout = () => {
     localStorage.clear()
     navigate("/login")
   }
+
   return (
     <div className="chat-box">
       <div className="title">
@@ -135,30 +161,45 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
         </div>
       ) : (
         <div className="messages">
-          {messages.map((msg) => 
-          {
+          {messages.map((msg) => {
             const name = msg.sender == username ? "You" : msg.sender
             return (
               <div className={name == "You" ? "right" : "left"} key={msg.id}>
                 <span>{name}:</span>
+                {msg?.url ?
+                  <FilePreview fileUrl={msg?.url} fileType={msg?.fileType} />
+                  : <></>}
                 <p>{msg.message}</p>
               </div>
             )
-          }
-          )}
+          })}
         </div>
       )}
 
       <div className="send-message">
-        <form className="message-form" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Type a message"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-          />
-          <button type="submit">Send</button>
-        </form>
+
+        {showMessageForm ? (
+          <form className="message-form" onSubmit={handleSubmit}>
+            <input
+              type="text"
+              placeholder="Type a message"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+            />
+            <button onClick={() => setShowMessageForm(pre => !pre)}>Attach</button>
+            <button type="submit">Send</button>
+          </form>
+        ) : (
+          <form className="message-form" onSubmit={handleFileUpload}>
+            <input
+              type="file"
+              onChange={(e) => setSelectedFile(e.target.files[0])}
+              ref={fileInputRef}  // Attach the ref to the input
+            />
+            <button onClick={() => setShowMessageForm(pre => !pre)}>Message</button>
+            <button type="submit">Upload</button>
+          </form>
+        )}
       </div>
     </div>
   );

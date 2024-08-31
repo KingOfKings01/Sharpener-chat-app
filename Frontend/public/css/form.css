@@ -11,6 +11,15 @@
   height: 100vh;
   gap: 10px;
 }
+.message-form {
+  input[type="file"]{
+    background: #ddd;
+    /* padding: 10px; */
+    border: none;
+    cursor: pointer;
+    height: 36px;
+  }
+}
 
 .form-page .title {
   align-self: start;

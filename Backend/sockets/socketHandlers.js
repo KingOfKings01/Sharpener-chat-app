@@ -18,11 +18,13 @@ export default function socketHandlers(io) {
 
     // Handle new message
     socket.on("newMessage", async (data) => {
-      const { messageText, roomName, groupId, recipientEmail, senderToken } = data;
+      const { messageText, roomName, groupId, recipientEmail, senderToken } =
+        data;
+      const URL = data?.URL;
       try {
         const decoded = User.verifyToken(senderToken);
         const senderId = decoded.id;
-        const sender = decoded.name
+        const sender = decoded.name;
         let response = {};
 
         //Todo: Handle group chat message
@@ -46,6 +48,9 @@ export default function socketHandlers(io) {
             createdAt: newMessage.createdAt,
             groupId: newMessage.groupId,
           };
+
+          if (URL) response.url = URL;
+
           // console.table(response);
           io.to(roomName).emit("newMessage", response); // Broadcast to group
         }
@@ -71,7 +76,7 @@ export default function socketHandlers(io) {
             recipient: recipient.name,
             message: newMessage.message,
             createdAt: newMessage.createdAt,
-            groupId: null
+            groupId: null,
           };
           // console.table(response);
           io.to(roomName).emit("newMessage", response); // Send message to recipient
