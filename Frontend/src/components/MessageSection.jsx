@@ -126,10 +126,7 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
 
     console.log(url);
 
-    // Clear the file input
-    setSelectedFile(null);
-    fileInputRef.current.value = "";  // Clear the file input element
-
+    
     // Create a new message with the uploaded file URL
     const messageData = {
       messageText: newMessage,
@@ -139,11 +136,16 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
       recipientEmail: selectedUser,
       senderToken: token
     };
-
+    
+    console.log(messageData);
     // Emit the new message to the server
     socket.emit('newMessage', messageData);
+    
+    // Clear the file input
+    setSelectedFile(null);
+    fileInputRef.current.value = "";  // Clear the file input element
   }
-
+  
   const logout = () => {
     localStorage.clear()
     navigate("/login")
@@ -167,7 +169,7 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
               <div className={name == "You" ? "right" : "left"} key={msg.id}>
                 <span>{name}:</span>
                 {msg?.url ?
-                  <FilePreview fileUrl={msg?.url} fileType={msg?.fileType} />
+                  <FilePreview fileUrl={msg.url} />
                   : <></>}
                 <p>{msg.message}</p>
               </div>

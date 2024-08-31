@@ -76,7 +76,7 @@ export async function uploadFile(token, selectedFile) {
         },
       }
     );
-    return response.data;
+    return response.data.url;
   } catch (err) {
     throw new Error(
       err?.response?.data?.message ||

@@ -36,6 +36,10 @@ const Message = sequelize.define("Message", {
       allowNull: true, // Make this field optional
     },
   },
+  fileUrl: {
+    type: DataTypes.STRING,  // For storing file URLs
+    allowNull: true,
+  },
 });
 
 

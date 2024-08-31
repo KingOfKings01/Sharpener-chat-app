@@ -1,10 +1,7 @@
 import { Op } from "sequelize";
 import User from "../models/User.js";
 import Message from "../models/Message.js";
-import Group from "../models/Group.js";
-import GroupMember from "../models/GroupMember.js";
 import AWSService from "../services/awsService.js";
-import multer from 'multer'; // Buffer storage
 
 //Todo: Create a new message using User model
 // export const createMessage = async (req, res) => {
@@ -125,6 +122,7 @@ export const getMessages = async (req, res) => {
           id: message.id,
           message: message.message,
           createdAt: message.createdAt,
+          url: message.fileUrl || null, // Include URL if available
         });
       });
     } else if (recipientEmail) {
@@ -156,6 +154,7 @@ export const getMessages = async (req, res) => {
           id: message.id,
           message: message.message,
           createdAt: message.createdAt,
+          url: message.fileUrl || null, // Include URL if available
         });
       });
     }
@@ -271,9 +270,8 @@ export const uploadFile = async (req, res) => {
     const uploadResult = await awsService.uploadToS3(key, buffer, mimetype);
     return res.status(200).json({ url: uploadResult.Location });
 
-    // res.status(200).json({ url: "uploadResult.Location" });
   } catch (err) {
-  
+    console.error(err)
     res
       .status(500)
       .json({ message: "Internal Server Error - Error uploading file" });

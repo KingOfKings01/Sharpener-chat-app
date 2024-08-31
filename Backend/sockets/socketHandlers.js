@@ -18,16 +18,16 @@ export default function socketHandlers(io) {
 
     // Handle new message
     socket.on("newMessage", async (data) => {
-      const { messageText, roomName, groupId, recipientEmail, senderToken } =
-        data;
-      const URL = data?.URL;
       try {
+        const { messageText, roomName, groupId, recipientEmail, senderToken } = data;
+        const URL = data?.URL;
+        
         const decoded = User.verifyToken(senderToken);
         const senderId = decoded.id;
         const sender = decoded.name;
         let response = {};
 
-        //Todo: Handle group chat message
+        // Handle group chat message
         if (groupId) {
           const group = await Group.findByPk(groupId);
           if (!group) {
@@ -38,6 +38,7 @@ export default function socketHandlers(io) {
             message: messageText,
             userId: senderId,
             groupId: groupId,
+            fileUrl: URL || null, // Save the URL if provided
           });
 
           response = {
@@ -47,16 +48,11 @@ export default function socketHandlers(io) {
             message: newMessage.message,
             createdAt: newMessage.createdAt,
             groupId: newMessage.groupId,
+            url: newMessage.fileUrl, // Add URL to response
           };
-
-          if (URL) response.url = URL;
-
-          // console.table(response);
-          io.to(roomName).emit("newMessage", response); // Broadcast to group
         }
-        // Todo: handle private messages
+        // Handle private messages
         else if (recipientEmail) {
-          // Handle direct message
           const recipient = await User.findOne({
             where: { email: recipientEmail },
           });
@@ -68,6 +64,7 @@ export default function socketHandlers(io) {
             message: messageText,
             userId: senderId,
             recipientId: recipient.id,
+            fileUrl: URL || null, // Save the URL if provided
           });
 
           response = {
@@ -77,10 +74,12 @@ export default function socketHandlers(io) {
             message: newMessage.message,
             createdAt: newMessage.createdAt,
             groupId: null,
+            url: newMessage.fileUrl, // Add URL to response
           };
-          // console.table(response);
-          io.to(roomName).emit("newMessage", response); // Send message to recipient
         }
+
+        console.table(response);
+        return io.to(roomName).emit("newMessage", response); // Send message to recipient
       } catch (error) {
         console.error("Error handling message:", error);
         socket.emit("error", {
