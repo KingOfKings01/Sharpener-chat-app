@@ -1,4 +1,5 @@
 import "dotenv/config";
+import './services/cronJobs.js';    //Todo: Run every night at 12 AM
 import http from "http";
 import express from "express";
 import { Server } from "socket.io";
