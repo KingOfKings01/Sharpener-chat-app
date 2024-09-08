@@ -72,7 +72,6 @@ export async function uploadFile(token, selectedFile) {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data', // Set this to multipart/form-data
-
         },
       }
     );

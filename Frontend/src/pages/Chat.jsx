@@ -3,17 +3,18 @@ import UserList from "../components/UserList";
 import GroupList from "../components/GroupList";
 import MessageSection from "../components/MessageSection";
 import "../../public/css/chat.css";
+import { useNavigate } from "react-router-dom";
 
 export default function Chat() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [showUsers, setShowUsers] = useState(true); // Toggle between Users and Groups
-
+  const navigate = useNavigate();
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       // Redirect to login page if token is not found
-     return window.location.href = "/login";
+     return navigate("/login");
     }
   },[])
 
@@ -24,7 +25,6 @@ export default function Chat() {
         <div className="toggle-buttons">
           <button onClick={() => {
             setShowUsers(true)
-            // setSelectedUser(null);
             setSelectedGroup(null);
           }} className={showUsers ? "active" : ""}>
             Users
@@ -32,7 +32,6 @@ export default function Chat() {
           <button onClick={() => {
             setShowUsers(false)
             setSelectedUser(null);
-            // setSelectedGroup(null);
           }} className={!showUsers ? "active" : ""}>
             Groups
           </button>

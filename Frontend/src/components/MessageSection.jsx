@@ -35,34 +35,42 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
 
   useEffect(() => {
     if (!selectedUser && !selectedGroup) return; // Do nothing if no user or group is selected
-
+  
+    // Clear all stored messages before storing new ones
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith("messages_")) {
+        localStorage.removeItem(key);
+      }
+    });
+  
     const key = selectedUser ? `messages_user_${selectedUser}` : `messages_group_${selectedGroup}`;
     const storedMessages = JSON.parse(localStorage.getItem(key)) || [];
     setMessages(storedMessages);
-
+  
     const lastStoredMessage = storedMessages[storedMessages.length - 1];
     setLastMessageId(lastStoredMessage ? lastStoredMessage.id : null);
-
+  
     const fetchMessages = async () => {
       try {
         const fetchedMessages = await getMessages(token, lastMessageId, selectedUser, selectedGroup);
-
+  
         if (fetchedMessages.length === 0) return;
-
+  
         setMessages(prevMessages => {
           const existingIds = new Set(prevMessages.map(msg => msg.id));
           const uniqueMessages = fetchedMessages.filter(msg => !existingIds.has(msg.id));
-
+  
           const newLastMessageId = uniqueMessages.length > 0
             ? uniqueMessages[uniqueMessages.length - 1].id
             : lastMessageId;
-
+  
           const updatedMessages = [...prevMessages, ...uniqueMessages];
           const sortedMessages = updatedMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
           const limitedMessages = sortedMessages.slice(-10);
-
+  
+          // Store only the messages for the currently selected user/group
           localStorage.setItem(key, JSON.stringify(limitedMessages));
-
+  
           setLastMessageId(newLastMessageId);
           return limitedMessages;
         });
@@ -70,40 +78,43 @@ export default function MessageSection({ selectedUser, selectedGroup }) {
         console.error("Error fetching messages:", error);
       }
     };
-
+  
     fetchMessages();
-
+  
+    // Handle room joining and leaving as usual
     const createRoomId = (user1, user2) => {
       return [user1, user2].sort().join('_');
     };
-
+  
     if (roomName) {
       socket.emit('leaveRoom', roomName);
     }
-
+  
     const currentUserEmail = localStorage.getItem("email");
     const newRoomId = selectedUser ? createRoomId(selectedUser, currentUserEmail) : `group_${selectedGroup}`;
     setRoomName(newRoomId);
     socket.emit('joinRoom', newRoomId);
-
+  
     const handleNewMessage = (newMessage) => {
       setMessages(prevMessages => {
         const updatedMessages = [...prevMessages, newMessage];
         const sortedMessages = updatedMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         const limitedMessages = sortedMessages.slice(-10);
-
+  
+        // Store only the messages for the currently selected user/group
         localStorage.setItem(key, JSON.stringify(limitedMessages));
-
+  
         return limitedMessages;
       });
     };
-
+  
     socket.on('newMessage', handleNewMessage);
-
+  
     return () => {
       socket.off('newMessage', handleNewMessage); // Clean up the listener
     };
   }, [selectedUser, selectedGroup]);
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
